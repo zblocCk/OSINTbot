@@ -11,6 +11,11 @@ class TargetType(Enum):
     URL = "url"
     IMAGE = "image"
 
+class Confidence(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
 @dataclass
 class Target:
     value: str
@@ -30,4 +35,23 @@ class Findings:
     target: Target
     title: str
     description: str
+    confidence: Confidence = Confidence.LOW
     evidence: list[Evidence] = field(default_factory=list)
+    observed_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+@dataclass
+class Investigation:
+    name: str
+    targets: list[Target] = field(default_factory=list)
+    findings: list[Findings] = field(default_factory=list)
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+    def add_target(self, target: list[Target]) -> None:
+        self.targets.append(target)
+
+    def add_finding(self, finding: Findings) -> None:
+        self.findings.append(finding)

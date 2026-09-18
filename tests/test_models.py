@@ -3,6 +3,8 @@ from osintbot.core.models import (
     Findings,
     Target,
     TargetType,
+    Investigation,
+    Confidence,
 )
 
 def test_create_username_target():
@@ -35,3 +37,34 @@ def test_create_findings():
 
     assert findings.target == target
     assert len(findings.evidence) == 1
+
+def test_investigation_can_contain_targets():
+    investigation = Investigation(
+        name = "Test investigation",
+    )
+
+    target = Target(
+        value = "example123",
+        target_type = TargetType.USERNAME,
+    )
+
+    investigation.add_target(target)
+
+    assert investigation.name == "Test investigation"
+    assert len(investigation.targets) == 1
+    assert investigation.targets[0] == target
+
+def test_finding_has_confidence():
+    target = Target(
+        value = "example123",
+        target_type = TargetType.USERNAME,
+    )
+
+    findings = Findings(
+        target = target,
+        title = "possible profile",
+        description = "A matching public profile observed",
+        confidence = Confidence.MEDIUM,
+    )
+
+    assert findings.confidence == Confidence.MEDIUM
