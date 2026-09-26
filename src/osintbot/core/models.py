@@ -16,6 +16,11 @@ class Confidence(Enum):
     MEDIUM = "medium"
     HIGH = "high"
 
+class SourceStatus(Enum):
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
 @dataclass
 class Target:
     value: str
@@ -42,10 +47,18 @@ class Findings:
     )
 
 @dataclass
+class SourceExecution:
+    source: str
+    status: SourceStatus
+    findings: list[Findings] = field(default_factory=list)
+    error: str | None = None
+
+@dataclass
 class Investigation:
     name: str
     targets: list[Target] = field(default_factory=list)
     findings: list[Findings] = field(default_factory=list)
+    executions: list[SourceExecution] = field(default_factory=list)
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
@@ -55,3 +68,6 @@ class Investigation:
 
     def add_finding(self, finding: Findings) -> None:
         self.findings.append(finding)
+
+    def add_execution(self, execution: SourceExecution) -> None:
+        self.executions.append(execution)

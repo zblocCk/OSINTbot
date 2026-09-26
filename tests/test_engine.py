@@ -3,6 +3,7 @@ from osintbot.core.models import (
     Confidence,
     Findings,
     Investigation,
+    SourceStatus,
     Target,
     TargetType,
 )
@@ -42,6 +43,15 @@ class FakeEmailSource(OSINTSource):
                 confidence=Confidence.MEDIUM,
             )
         ]
+
+class FailingSource(OSINTSource):
+    @property
+    def name(self) -> str:
+        return "Failing source"
+    def supports(self, target: Target) -> bool:
+        return True
+    def search(self, target: Target) -> list[Findings]:
+        raise RuntimeError("Test source failure")
 
 def test_engine_runs_compatible_sources():
     username_source = FakeUsernameSource()
@@ -87,3 +97,60 @@ def test_engine_skips_incompatible_sources():
     result = engine.investigate(investigation)
 
     assert len(result.findings) == 0
+
+def test_engine_records_completed_execution():
+    source = FakeUsernameSource()
+
+    engine = InvestigationEngine(
+        sources=[source]
+    )
+    investigation = Investigation(
+        name="test investigation",
+    )
+    target = Target(
+        value="example123",
+        target_type=TargetType.USERNAME,
+    )
+    investigation.add_target(target)
+    result = engine.investigate(investigation)
+
+    assert len(result.executions) == 1
+    assert result.executions[0].source == "fake user source"
+    assert result.executions[0].status == SourceStatus.COMPLETED
+
+def test_engine_records_skipped_source():
+    source = FakeEmailSource()
+    engine = InvestigationEngine(
+        sources=[source]
+    )
+    investigation = Investigation(
+        name="test investigation",
+    )
+    target = Target(
+        value="example123",
+        target_type=TargetType.USERNAME,
+    )
+    investigation.add_target(target)
+    result = engine.investigate(investigation)
+
+    assert len(result.executions) == 1
+    assert result.executions[0].status == SourceStatus.SKIPPED
+
+def test_engine_records_source_failure():
+    source = FailingSource()
+    engine = InvestigationEngine(
+        sources=[source]
+    )
+    investigation = Investigation(
+        name="test investigation",
+    )
+    target = Target(
+        value="example123",
+        target_type=TargetType.USERNAME,
+    )
+    investigation.add_target(target)
+    result = engine.investigate(investigation)
+
+    assert len(result.executions) == 1
+    assert result.executions[0].status == SourceStatus.FAILED
+    assert result.executions[0].error == "Test source failure"
