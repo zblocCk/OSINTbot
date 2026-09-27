@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from osintbot.core.models import Findings, Target
+from osintbot.core.models import Finding, Target
 
 class OSINTSource:
     """
@@ -18,6 +18,6 @@ class OSINTSource:
         raise NotImplementedError
 
     @abstractmethod
-    def search(self, target: Target) -> list[Findings]:
+    def search(self, target: Target) -> list[Finding]:
         """investigate target and return findings"""
         raise NotImplementedError

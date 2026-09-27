@@ -36,7 +36,7 @@ class Evidence:
     )
 
 @dataclass
-class Findings:
+class Finding:
     target: Target
     title: str
     description: str
@@ -50,14 +50,14 @@ class Findings:
 class SourceExecution:
     source: str
     status: SourceStatus
-    findings: list[Findings] = field(default_factory=list)
+    findings: list[Finding] = field(default_factory=list)
     error: str | None = None
 
 @dataclass
 class Investigation:
     name: str
     targets: list[Target] = field(default_factory=list)
-    findings: list[Findings] = field(default_factory=list)
+    findings: list[Finding] = field(default_factory=list)
     executions: list[SourceExecution] = field(default_factory=list)
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
@@ -66,7 +66,7 @@ class Investigation:
     def add_target(self, target: list[Target]) -> None:
         self.targets.append(target)
 
-    def add_finding(self, finding: Findings) -> None:
+    def add_finding(self, finding: Finding) -> None:
         self.findings.append(finding)
 
     def add_execution(self, execution: SourceExecution) -> None:

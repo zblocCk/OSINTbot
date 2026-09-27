@@ -1,6 +1,6 @@
 from osintbot.core.models import (
     Evidence,
-    Findings,
+    Finding,
     Target,
     TargetType,
     Investigation,
@@ -28,7 +28,7 @@ def test_create_findings():
         url="https://example.com/example123",
     )
 
-    findings = Findings(
+    findings = Finding(
         target = target,
         title = "Test findings",
         description = "A test findings",
@@ -60,7 +60,7 @@ def test_finding_has_confidence():
         target_type = TargetType.USERNAME,
     )
 
-    findings = Findings(
+    findings = Finding(
         target = target,
         title = "possible profile",
         description = "A matching public profile observed",

@@ -1,6 +1,6 @@
 from osintbot.core.models import (
     Confidence,
-    Findings,
+    Finding,
     Target,
     TargetType,
 )
@@ -14,9 +14,9 @@ class FakeUserNameSource(OSINTSource):
     def supports(self, target: Target) -> bool:
         return target.target_type == TargetType.USERNAME
 
-    def search(self, target: Target) -> list[Findings]:
+    def search(self, target: Target) -> list[Finding]:
         return [
-            Findings(
+            Finding(
                 target=target,
                 title="Test username found",
                 description=f"Found username {target.value}",

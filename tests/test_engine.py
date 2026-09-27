@@ -1,7 +1,7 @@
 from osintbot.core.engine import InvestigationEngine
 from osintbot.core.models import (
     Confidence,
-    Findings,
+    Finding,
     Investigation,
     SourceStatus,
     Target,
@@ -18,9 +18,9 @@ class FakeUsernameSource(OSINTSource):
     def supports(self, target: Target) -> bool:
         return target.target_type == TargetType.USERNAME
 
-    def search(self, target: Target) -> list[Findings]:
+    def search(self, target: Target) -> list[Finding]:
         return [
-            Findings(
+            Finding(
                 target=target,
                 title="fake user found",
                 description=f"Found user: {target.value}",
@@ -34,9 +34,9 @@ class FakeEmailSource(OSINTSource):
         return "fake email source"
     def supports(self, target: Target) -> bool:
         return target.target_type == TargetType.EMAIL
-    def search(self, target: Target) -> list[Findings]:
+    def search(self, target: Target) -> list[Finding]:
         return [
-            Findings(
+            Finding(
                 target=target,
                 title="test email found",
                 description=f"Found email: {target.value}",
@@ -50,7 +50,7 @@ class FailingSource(OSINTSource):
         return "Failing source"
     def supports(self, target: Target) -> bool:
         return True
-    def search(self, target: Target) -> list[Findings]:
+    def search(self, target: Target) -> list[Finding]:
         raise RuntimeError("Test source failure")
 
 def test_engine_runs_compatible_sources():
