@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock, patch
 from osintbot.core.engine import InvestigationEngine
 from osintbot.core.models import (
     Confidence,
@@ -8,6 +9,8 @@ from osintbot.core.models import (
     TargetType,
 )
 from osintbot.core.source import OSINTSource
+from osintbot.sources.dns.source import DNSSource
+from dns.resolver import NoAnswer
 
 class FakeUsernameSource(OSINTSource):
 
@@ -154,3 +157,36 @@ def test_engine_records_source_failure():
     assert len(result.executions) == 1
     assert result.executions[0].status == SourceStatus.FAILED
     assert result.executions[0].error == "Test source failure"
+
+@patch("osintbot.sources.dns.source.dns.resolver.Resolver")
+def test_engine_runs_dns_source(mock_resolver):
+    resolver = mock_resolver.return_value
+
+    a_answer = MagicMock()
+    a_answer.to_text.return_value = "93.184.216.34"
+
+    def fake_resolve(domain, record_type):
+        if record_type == "A":
+            return [a_answer]
+        raise NoAnswer()
+    resolver.resolve.side_effect = fake_resolve
+
+    engine = InvestigationEngine(
+        sources=[DNSSource()]
+    )
+    investigation = Investigation(
+        name="DNS integration test",
+    )
+    target = Target(
+        value="example.com",
+        target_type=TargetType.DOMAIN,
+    )
+    investigation.add_target(target)
+    result = engine.investigate(investigation)
+
+    assert len(result.findings) == 1
+    assert result.findings[0].title == "DNS A record"
+
+    assert len(result.executions) == 1
+    assert result.executions[0].source == "DNS"
+    assert result.executions[0].status == SourceStatus.COMPLETED
